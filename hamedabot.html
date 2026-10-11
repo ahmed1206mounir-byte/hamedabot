@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Functional Chatbot</title>
+</head>
+<body>
+
+    <h1>ahmed Chatbot</h1>
+
+    <hr>
+
+    <h3>Chat Log</h3>
+    <div id="chatLog" style="height: 300px; overflow-y: scroll; border: 1px solid black; padding: 10px;">
+        <div><b>Bot:</b> Hello! Enter a message below.</div>
+    </div>
+
+    <br>
+
+    <form id="chatForm">
+        <input type="text" id="userInput" placeholder="Type a message..." required style="width: 300px;">
+        <button type="submit">Send</button>
+        <button type="button" id="clearBtn">Clear Chat</button>
+    </form>
+
+    <script>
+        const chatLog = document.getElementById('chatLog');
+        const chatForm = document.getElementById('chatForm');
+        const userInput = document.getElementById('userInput');
+        const clearBtn = document.getElementById('clearBtn');
+
+        // Simple response lookup table
+        const botRules = [
+            { pattern: /hi|hello|hey/i, reply: "Hello! How can I help you?" },
+            { pattern: /how are you/i, reply: "I am functioning properly! How are you?" },
+            { pattern: /name/i, reply: "I am a simple functional JS chatbot." },
+            { pattern: /time/i, reply: () => "Current time is: " + new Date().toLocaleTimeString() },
+            { pattern: /date/i, reply: () => "Today's date is: " + new Date().toLocaleDateString() },
+            { pattern: /help/i, reply: "You can ask me about time, date, or say hello." }
+        ];
+
+        chatForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            // 1. Add User Message
+            appendMessage("User", text);
+            userInput.value = '';
+
+            // 2. Generate and Add Bot Response
+            setTimeout(() => {
+                const reply = getBotReply(text);
+                appendMessage("Bot", reply);
+            }, 300);
+        });
+
+        function getBotReply(text) {
+            for (let rule of botRules) {
+                if (rule.pattern.test(text)) {
+                    return typeof rule.reply === 'function' ? rule.reply() : rule.reply;
+                }
+            }
+            return "Echoing: " + text;
+        }
+
+        function appendMessage(sender, text) {
+            const msgDiv = document.createElement('div');
+            msgDiv.innerHTML = '<b>' + sender + ':</b> ' + escapeHtml(text);
+            chatLog.appendChild(msgDiv);
+            chatLog.scrollTop = chatLog.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        clearBtn.addEventListener('click', function() {
+            chatLog.innerHTML = '<div><b>Bot:</b> Chat cleared!</div>';
+        });
+    </script>
+
+</body>
+</html>
